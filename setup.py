@@ -40,7 +40,7 @@ Example
 
 setup(
     name="ntplib",
-    version="0.4.0",
+    version="0.4.1",
     description="Python NTP library",
     author="Charles-Francois Natali",
     author_email="cf.natali@gmail.com",

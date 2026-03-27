@@ -2,9 +2,6 @@
 <div align="center">An NTP Client for Python</div>
 <br />
 
-[![PyPI Status](https://img.shields.io/pypi/v/ntplib.svg)](https://pypi.python.org/pypi/ntplib)
-[![Downloads](https://img.shields.io/pypi/dm/ntplib.svg)](https://pypi.python.org/pypi/ntplib)
-
 # Description
 
 This module offers a simple interface to query NTP servers from Python.

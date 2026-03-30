@@ -145,7 +145,7 @@ class TestNTPLib(unittest.TestCase):
         system_timestamp = (datetime.datetime(2036, 2, 8) - epoch).total_seconds()
         ntp_timestamp =      63104.0 # 2036-02-08 00:00:00 UTC in NTP time (after rollover)
         self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
-
+        # Note: yes, there's an ambiguity here, but it's expected due to the rollover.
 
     def test_rollover(self):
         """ Test for rollover - see

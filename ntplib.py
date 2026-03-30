@@ -39,11 +39,6 @@ class NTPException(Exception):
     """Exception raised by this module."""
 
 
-class NTPRolloverException(NTPException):
-    """Exception raised when the system time is beyond the NTPv3 rollover. """
-    # See https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps
-
-
 class NTP:  # pylint: disable=no-init
     """Helper class defining constants."""
 
@@ -417,10 +412,9 @@ def system_to_ntp_time(timestamp):
     corresponding NTP time
     """
     ntp_time = timestamp + NTP.NTP_DELTA
-    if ntp_time >= 2 ** 32:
-        raise NTPRolloverException("Timestamp %s is beyond NTPv3 rollover" %
-                                   timestamp)
-    return ntp_time
+
+    # Constrain to 32 bits
+    return ntp_time % NTP.NTP_ERA_SPAN
 
 
 def leap_to_text(leap):

@@ -128,6 +128,23 @@ class TestNTPLib(unittest.TestCase):
         self.assertRaises(AssertionError,
                           ntplib.ntp_to_system_time, ntp_timestamp)
 
+    def test_system_to_ntp_time(self):
+        """ Test for system_to_ntp_time """
+        epoch = datetime.datetime.utcfromtimestamp(0)
+
+        system_timestamp = (datetime.datetime(1900, 1, 1) - epoch).total_seconds()
+        ntp_timestamp =          0.0 # 1900-01-01 00:00:00 UTC in NTP time
+        self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
+
+        system_timestamp = (datetime.datetime(2036, 2, 7) - epoch).total_seconds()
+        ntp_timestamp = 4294944000.0 # 2036-02-07 00:00:00 UTC in NTP time
+        self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
+
+        system_timestamp = (datetime.datetime(2036, 2, 8) - epoch).total_seconds()
+        ntp_timestamp =      63104.0 # 2036-02-08 00:00:00 UTC in NTP time (after rollover)
+        self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
+
+
     def test_rollover(self):
         """ Test for rollover - see
             https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps.
@@ -143,9 +160,11 @@ class TestNTPLib(unittest.TestCase):
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
                 timestamp)
 
-        timestamp = (datetime.datetime(2036, 2, 7, 12) - epoch).total_seconds()
-        self.assertRaises(ntplib.NTPRolloverException,
-                          ntplib.system_to_ntp_time, timestamp)
+        timestamp = (datetime.datetime(2036, 2, 8) - epoch).total_seconds()
+        self.assertEqual(
+                ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
+                timestamp)
+
 
     def test_address_family(self):
         """ Test support of socket address family. """

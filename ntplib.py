@@ -389,6 +389,12 @@ def ntp_to_system_time(timestamp):
     corresponding system time
     """
 
+    # Per RFC-5905 section 7.3, NTP timestamps are unsigned 64-bit fixed-point numbers, with the
+    # integer part in the first 32 bits and the fractional part in the last 32 bits.
+    # The header component is identical to the NTPv3 header and previous versions.
+    # Therefore the timestamp must be in the range [0, 2^32) to be valid.
+    assert(timestamp >= 0 and timestamp < 2**32)
+
     # If timestamp <= INT32_MAX we assume we're in era 1
     if timestamp <= NTP.NTP_ERA_SPAN/2:
         timestamp = timestamp + NTP.NTP_ERA_SPAN

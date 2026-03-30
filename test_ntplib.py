@@ -128,7 +128,6 @@ class TestNTPLib(unittest.TestCase):
         self.assertRaises(AssertionError,
                           ntplib.ntp_to_system_time, timestamp)
 
-
     def test_rollover(self):
         """ Test for rollover - see
             https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps.

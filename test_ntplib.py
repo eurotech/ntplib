@@ -142,10 +142,11 @@ class TestNTPLib(unittest.TestCase):
         ntp_timestamp = 4294944000.0 # 2036-02-07 00:00:00 UTC in NTP time
         self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
 
+        # Note: yes, there's an ambiguity for dates beyond 2036-02-07, but it's expected
+        # due to how we handle the Y2036 rollover.
         system_timestamp = (datetime.datetime(2036, 2, 8) - epoch).total_seconds()
         ntp_timestamp =      63104.0 # 2036-02-08 00:00:00 UTC in NTP time (after rollover)
         self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
-        # Note: yes, there's an ambiguity here, but it's expected due to the rollover.
 
     def test_rollover(self):
         """ Test for rollover - see
@@ -154,7 +155,7 @@ class TestNTPLib(unittest.TestCase):
         epoch = datetime.datetime.utcfromtimestamp(0)
 
         timestamp = (datetime.datetime(1968, 1, 20) - epoch).total_seconds()
-        # Note: this is expected due to the rollover.
+        # Note: this is expected due to how we handle Y2036 rollover.
         self.assertNotEqual(
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
                 timestamp)
@@ -185,7 +186,7 @@ class TestNTPLib(unittest.TestCase):
                 timestamp)
 
         timestamp = (datetime.datetime(2104, 2, 27) - epoch).total_seconds()
-        # Note: this is expected due to the rollover.
+        # Note: this is expected due to how we handle Y2036 rollover.
         self.assertNotEqual(
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
                 timestamp)

@@ -152,6 +152,18 @@ class TestNTPLib(unittest.TestCase):
             https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps.
         """
         epoch = datetime.datetime.utcfromtimestamp(0)
+
+        timestamp = (datetime.datetime(1968, 1, 20) - epoch).total_seconds()
+        # Note: this is expected due to the rollover.
+        self.assertNotEqual(
+                ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
+                timestamp)
+
+        timestamp = (datetime.datetime(1968, 1, 21) - epoch).total_seconds()
+        self.assertEqual(
+                ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
+                timestamp)
+
         timestamp = (datetime.datetime(2022, 8, 5, 19, 8, 42) - epoch).total_seconds()
         self.assertEqual(
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
@@ -167,6 +179,16 @@ class TestNTPLib(unittest.TestCase):
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
                 timestamp)
 
+        timestamp = (datetime.datetime(2104, 2, 26) - epoch).total_seconds()
+        self.assertEqual(
+                ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
+                timestamp)
+
+        timestamp = (datetime.datetime(2104, 2, 27) - epoch).total_seconds()
+        # Note: this is expected due to the rollover.
+        self.assertNotEqual(
+                ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),
+                timestamp)
 
     def test_address_family(self):
         """ Test support of socket address family. """

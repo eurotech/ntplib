@@ -134,6 +134,10 @@ class TestNTPLib(unittest.TestCase):
         ntp_timestamp =          0.0 # 1900-01-01 00:00:00 UTC in NTP time
         self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
 
+        system_timestamp = (datetime.datetime(1900, 1, 1, 17, 31, 44) - epoch).total_seconds()
+        ntp_timestamp =      63104.0 # 1900-01-01 17:31:44 UTC in NTP time
+        self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))
+
         system_timestamp = (datetime.datetime(2036, 2, 7) - epoch).total_seconds()
         ntp_timestamp = 4294944000.0 # 2036-02-07 00:00:00 UTC in NTP time
         self.assertEqual(ntp_timestamp, ntplib.system_to_ntp_time(system_timestamp))

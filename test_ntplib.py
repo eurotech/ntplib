@@ -84,6 +84,7 @@ class TestNTPLib(unittest.TestCase):
 
         info = client.request(self.NTP_SERVER)
 
+        # This will fail after 2036-02-07 06:28:16 UTC, but we can test it with the current time.
         self.assertEqual(int(info.tx_time), ntplib.ntp_to_system_time(
                          ntplib.system_to_ntp_time(int(info.tx_time))))
 
@@ -93,11 +94,31 @@ class TestNTPLib(unittest.TestCase):
         self.assertTrue(isinstance(ntplib.ref_id_to_text(info.ref_id,
                                                          info.stratum), str))
 
+    def test_ntp_to_system_time(self):
+        epoch = datetime.datetime.utcfromtimestamp(0) # NTP epoch is 1900-01-01, but Python's datetime epoch is 1970-01-01. We need to use the same epoch for both to test rollover correctly.
+
+        timestamp = 4294944000.0 # 2036-02-07 00:00:00 UTC in NTP time
+        system_timestamp = (datetime.datetime(2036, 2, 7) - epoch).total_seconds()
+        self.assertEqual(system_timestamp, ntplib.ntp_to_system_time(timestamp))
+
+        timestamp = 4295030400.0 # 2036-02-08 00:00:00 UTC in NTP time
+        system_timestamp = (datetime.datetime(2036, 2, 8) - epoch).total_seconds()
+        self.assertEqual(system_timestamp, ntplib.ntp_to_system_time(timestamp))
+
+        timestamp = 2147480000.0 # 1968-01-20 02:13:20 UTC in NTP time
+        system_timestamp = (datetime.datetime(2104, 2, 26, 8, 41, 36) - epoch).total_seconds()
+        self.assertEqual(system_timestamp, ntplib.ntp_to_system_time(timestamp))
+
+        timestamp = 2147580000.0 # 1968-01-21 06:00:00 UTC in NTP time
+        system_timestamp = (datetime.datetime(1968, 1, 21, 6, 0, 0) - epoch).total_seconds()
+        self.assertEqual(system_timestamp, ntplib.ntp_to_system_time(timestamp))
+
     def test_rollover(self):
         """ Test for rollover - see
             https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps.
         """
-        epoch = datetime.datetime.utcfromtimestamp(0)
+        epoch = datetime.datetime.utcfromtimestamp(0) # NTP epoch is 1900-01-01, but Python's datetime epoch is 1970-01-01. We need to use the same epoch for both to test rollover correctly.
+        print("Testing rollover with epoch: {}".format(epoch))
         timestamp = (datetime.datetime(2022, 8, 5, 19, 8, 42) - epoch).total_seconds()
         self.assertEqual(
                 ntplib.ntp_to_system_time(ntplib.system_to_ntp_time(timestamp)),

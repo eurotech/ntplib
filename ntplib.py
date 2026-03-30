@@ -52,6 +52,8 @@ class NTP:  # pylint: disable=no-init
     _NTP_EPOCH = datetime.datetime(1900, 1, 1)
     """NTP epoch"""
     NTP_DELTA = int((_SYSTEM_EPOCH - _NTP_EPOCH).total_seconds())
+    """NTP era"""
+    NTP_ERA_SPAN = 2**32
     """delta between system and NTP time"""
 
     REF_ID_TABLE = {
@@ -386,6 +388,11 @@ def ntp_to_system_time(timestamp):
     Returns:
     corresponding system time
     """
+
+    # If timestamp <= INT32_MAX we assume we're in era 1
+    if timestamp <= NTP.NTP_ERA_SPAN/2:
+        timestamp = timestamp + NTP.NTP_ERA_SPAN
+
     return timestamp - NTP.NTP_DELTA
 
 

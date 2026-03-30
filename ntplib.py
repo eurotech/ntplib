@@ -395,11 +395,16 @@ def ntp_to_system_time(timestamp):
     # Therefore the timestamp must be in the range [0, 2^32) to be valid.
     assert 0 <= timestamp < 2**32
 
-    # If timestamp <= INT32_MAX we assume we're in era 1
-    if timestamp <= NTP.NTP_ERA_SPAN/2:
-        timestamp = timestamp + NTP.NTP_ERA_SPAN
+    # We start from NTP era 0
+    era = 0
 
-    return timestamp - NTP.NTP_DELTA
+    # If timestamp <= INT32_MAX (i.e. 20/01/1968) we assume we're in era 1
+    if timestamp <= NTP.NTP_ERA_SPAN/2:
+        era = 1
+
+    # Per RFC-5905 section 6:
+    # s = era * 2^(32) + timestamp.
+    return timestamp + (era * NTP.NTP_ERA_SPAN) - NTP.NTP_DELTA
 
 
 def system_to_ntp_time(timestamp):

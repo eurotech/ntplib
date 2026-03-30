@@ -42,9 +42,9 @@ setup(
     name="ntplib",
     version="0.4.1",
     description="Python NTP library",
-    author="Charles-Francois Natali",
-    author_email="cf.natali@gmail.com",
-    url="https://github.com/cf-natali/ntplib",
+    author="Eurotech S.p.A.",
+    author_email="support@eurotech.com",
+    url="https://github.com/eurotech/ntplib.git",
     py_modules=["ntplib"],
     license="MIT",
     classifiers=[

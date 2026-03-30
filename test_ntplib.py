@@ -84,7 +84,6 @@ class TestNTPLib(unittest.TestCase):
 
         info = client.request(self.NTP_SERVER)
 
-        # This will fail after 2104-02-26 00:00:00 UTC, but we can test it with the current time.
         self.assertEqual(int(info.tx_time), ntplib.ntp_to_system_time(
                          ntplib.system_to_ntp_time(int(info.tx_time))))
 

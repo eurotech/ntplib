@@ -39,11 +39,6 @@ class NTPException(Exception):
     """Exception raised by this module."""
 
 
-class NTPRolloverException(NTPException):
-    """Exception raised when the system time is beyond the NTPv3 rollover. """
-    # See https://en.wikipedia.org/wiki/Network_Time_Protocol#Timestamps
-
-
 class NTP:  # pylint: disable=no-init
     """Helper class defining constants."""
 
@@ -52,6 +47,8 @@ class NTP:  # pylint: disable=no-init
     _NTP_EPOCH = datetime.datetime(1900, 1, 1)
     """NTP epoch"""
     NTP_DELTA = int((_SYSTEM_EPOCH - _NTP_EPOCH).total_seconds())
+    """NTP era"""
+    NTP_ERA_SPAN = 2**32
     """delta between system and NTP time"""
 
     REF_ID_TABLE = {
@@ -386,7 +383,23 @@ def ntp_to_system_time(timestamp):
     Returns:
     corresponding system time
     """
-    return timestamp - NTP.NTP_DELTA
+
+    # Per RFC-5905 section 7.3, NTP timestamps are unsigned 64-bit fixed-point numbers, with the
+    # integer part in the first 32 bits and the fractional part in the last 32 bits.
+    # The header component is identical to the NTPv3 header and previous versions.
+    # Therefore the timestamp must be in the range [0, 2^32) to be valid.
+    assert 0 <= timestamp < 2**32
+
+    # We start from NTP era 0
+    era = 0
+
+    # If timestamp <= INT32_MAX (i.e. 20/01/1968) we assume we're in era 1
+    if timestamp <= NTP.NTP_ERA_SPAN/2:
+        era = 1
+
+    # Per RFC-5905 section 6:
+    # s = era * 2^(32) + timestamp.
+    return timestamp + (era * NTP.NTP_ERA_SPAN) - NTP.NTP_DELTA
 
 
 def system_to_ntp_time(timestamp):
@@ -399,10 +412,9 @@ def system_to_ntp_time(timestamp):
     corresponding NTP time
     """
     ntp_time = timestamp + NTP.NTP_DELTA
-    if ntp_time >= 2 ** 32:
-        raise NTPRolloverException("Timestamp %s is beyond NTPv3 rollover" %
-                                   timestamp)
-    return ntp_time
+
+    # Constrain to 32 bits
+    return ntp_time % NTP.NTP_ERA_SPAN
 
 
 def leap_to_text(leap):
